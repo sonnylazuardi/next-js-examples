@@ -41,7 +41,6 @@ function PresenceDemo() {
             x: Math.round(event.clientX),
             y: Math.round(event.clientY),
           },
-          name,
         })
       }
       onPointerLeave={() =>
@@ -105,8 +104,9 @@ function Cursor({ color, x, y, name }) {
         />
       </svg>
       <div
-        className="absolute top-5 left-2 px-4 py-2 bg-blue-500 text-white leading-relaxed text-sm"
+        className="absolute top-5 left-2 px-4 py-2 text-white leading-relaxed text-sm"
         style={{
+          backgroundColor: color,
           borderRadius: 20,
         }}
       >
