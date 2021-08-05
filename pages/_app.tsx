@@ -5,7 +5,7 @@ import "tailwindcss/tailwind.css";
 import "../components/globals.css";
 
 const client = createClient({
-  authEndpoint: "https://liveblocks.io/api/examples/auth",
+  authEndpoint: "/api/auth",
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
