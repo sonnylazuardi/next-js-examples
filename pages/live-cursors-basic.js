@@ -1,10 +1,4 @@
-/**
- * This file shows how to add basic live cursors on your product.
- * https://preview.liveblocks.io/docs/examples/live-cursors
- */
-
 import React from "react";
-import ExampleInfo from "../components/ExampleInfo";
 import { useOthers, useMyPresence, RoomProvider } from "@liveblocks/react";
 
 export default function Room() {
@@ -19,28 +13,15 @@ export default function Room() {
       })}
     >
       <PresenceDemo />
-      <ExampleInfo
-        title="Basic Live Cursors Example"
-        description="Open this page in multiple windows to see the live cursors."
-        githubHref="https://github.com/liveblocks/next-js-examples/blob/main/pages/presence.tsx"
-        codeSandboxHref="https://codesandbox.io/s/github/liveblocks/next-js-examples?file=/pages/presence.tsx"
-      />
     </RoomProvider>
   );
 }
 
 function PresenceDemo() {
-  /**
-   * useMyPresence returns the presence of the current user and a function to update it.
-   * updateMyPresence is different than the setState function returned by the useState hook from React.
-   * You don't need to pass the full presence object to update it.
-   * See https://liveblocks.io/docs/api-reference/liveblocks-react#useMyPresence for more information
-   */
-  const [{ cursor }, updateMyPresence] = useMyPresence();
+  const [myPresence, updateMyPresence] = useMyPresence();
 
-  /**
-   * Return all the other users in the room and their presence (a cursor position in this case)
-   */
+  const { cursor, name } = myPresence;
+
   const others = useOthers();
 
   return (
@@ -60,6 +41,7 @@ function PresenceDemo() {
             x: Math.round(event.clientX),
             y: Math.round(event.clientY),
           },
+          name,
         })
       }
       onPointerLeave={() =>
@@ -70,39 +52,38 @@ function PresenceDemo() {
       }
     >
       <div className="max-w-sm text-center">
-        {cursor
-          ? `${cursor.x},${cursor.y}`
-          : "Move your cursor to broadcast its position to other people in the room."}
+        <input
+          className="focus:border-light-blue-500 focus:ring-1 focus:ring-light-blue-500 focus:outline-none w-full text-sm text-black placeholder-gray-500 border border-gray-200 rounded-md p-2"
+          type="text"
+          value={name}
+          onChange={(e) => {
+            updateMyPresence({ name: e.target.value });
+          }}
+        />
       </div>
 
-      {
-        /**
-         * Iterate over other users and display a cursor based on their presence
-         */
-        others.map(({ connectionId, presence }) => {
-          if (presence == null || presence.cursor == null) {
-            return null;
-          }
+      {others.map(({ connectionId, presence }) => {
+        if (presence == null || presence.cursor == null) {
+          return null;
+        }
 
-          return (
-            <Cursor
-              key={`cursor-${connectionId}`}
-              // connectionId is an integer that is incremented at every new connections
-              // Assigning a color with a modulo makes sure that a specific user has the same colors on every clients
-              color={COLORS[connectionId % COLORS.length]}
-              x={presence.cursor.x}
-              y={presence.cursor.y}
-            />
-          );
-        })
-      }
+        return (
+          <Cursor
+            key={`cursor-${connectionId}`}
+            color={COLORS[connectionId % COLORS.length]}
+            x={presence.cursor.x}
+            y={presence.cursor.y}
+            name={presence.name}
+          />
+        );
+      })}
     </div>
   );
 }
 
-function Cursor({ color, x, y }) {
+function Cursor({ color, x, y, name }) {
   return (
-    <svg
+    <div
       style={{
         position: "absolute",
         left: 0,
@@ -110,17 +91,28 @@ function Cursor({ color, x, y }) {
         transition: "transform 0.5s cubic-bezier(.17,.93,.38,1)",
         transform: `translateX(${x}px) translateY(${y}px)`,
       }}
-      width="24"
-      height="36"
-      viewBox="0 0 24 36"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
     >
-      <path
-        d="M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19841L11.7841 12.3673H5.65376Z"
-        fill={color}
-      />
-    </svg>
+      <svg
+        width="24"
+        height="36"
+        viewBox="0 0 24 36"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M5.65376 12.3673H5.46026L5.31717 12.4976L0.500002 16.8829L0.500002 1.19841L11.7841 12.3673H5.65376Z"
+          fill={color}
+        />
+      </svg>
+      <div
+        className="absolute top-5 left-2 px-4 py-2 bg-blue-500 text-white leading-relaxed text-sm"
+        style={{
+          borderRadius: 20,
+        }}
+      >
+        {name}
+      </div>
+    </div>
   );
 }
 
