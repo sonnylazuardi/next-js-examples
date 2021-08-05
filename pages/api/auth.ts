@@ -1,9 +1,30 @@
 import { authorize } from "@liveblocks/node";
 import { NextApiRequest, NextApiResponse } from "next";
+import Cors from 'cors'
+
+function initMiddleware(middleware: any) {
+  return (req: any, res: any) =>
+    new Promise((resolve, reject) => {
+      middleware(req, res, (result: any) => {
+        if (result instanceof Error) {
+          return reject(result)
+        }
+        return resolve(result)
+      })
+    })
+}
+
+const cors = initMiddleware(
+  Cors({
+    // Only allow requests with GET, POST and OPTIONS
+    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'DELETE', 'PATCH'],
+  })
+)
 
 const API_KEY = process.env.LIVEBLOCKS_SECRET_KEY;
 
 export default async function auth(req: NextApiRequest, res: NextApiResponse) {
+  await cors(req, res)
   if (!API_KEY) {
     return res.status(403).end();
   }
